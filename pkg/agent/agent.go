@@ -2,6 +2,8 @@ package agent
 
 import (
 	"fmt"
+	"github.com/williamfzc/sidebike/pkg/server/controllers/lifecycle"
+	"net/http"
 	"time"
 )
 
@@ -17,10 +19,19 @@ func (agent *Agent) GetRegistry() string {
 	return fmt.Sprintf("%s:%d", agent.Conf.Registry.Address, agent.Conf.Registry.Port)
 }
 
+func (agent *Agent) GetUrlPing() string {
+	return "http://" + agent.GetRegistry() + lifecycle.Ping.Path
+}
+
 func (agent *Agent) Run() {
 	period := agent.GetPeriod()
 	for range time.Tick(period) {
-		fmt.Printf("exec agent: %s\n", agent.GetRegistry())
+		resp, err := http.Get(agent.GetUrlPing())
+		if err != nil {
+			fmt.Printf("request error: %s\n", err)
+		} else {
+			fmt.Printf("ping backend: %s\n", resp)
+		}
 	}
 	select {}
 }
