@@ -52,7 +52,7 @@ func (agent *Agent) taskRequestMonitor() {
 			logger.Errorf("invalid response format: %s", err)
 			continue
 		}
-		if responseObj.StatusCode != server.StatusOk {
+		if responseObj.Signal != server.SignalOk {
 			logger.Errorf("status not ok")
 			continue
 		}

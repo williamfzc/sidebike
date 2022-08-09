@@ -14,8 +14,8 @@ func HandlePostTask(c *gin.Context) {
 		msg := fmt.Sprintf("parse task error: %s", err)
 		logger.Error(msg)
 		c.JSON(http.StatusBadRequest, Response{
-			StatusCode: StatusError,
-			Msg:        msg,
+			Signal: SignalError,
+			Msg:    msg,
 		})
 		return
 	}
@@ -25,8 +25,8 @@ func HandlePostTask(c *gin.Context) {
 		msg := fmt.Sprintf("parse pattern error: %s", err)
 		logger.Error(msg)
 		c.JSON(http.StatusBadRequest, Response{
-			StatusCode: StatusError,
-			Msg:        msg,
+			Signal: SignalError,
+			Msg:    msg,
 		})
 		return
 	}
@@ -41,7 +41,7 @@ func HandlePostTask(c *gin.Context) {
 			machine.AppendTask(newTask)
 		}
 	}
-	c.JSON(http.StatusOK, Response{StatusCode: StatusOk})
+	c.JSON(http.StatusOK, Response{Signal: SignalOk})
 }
 
 func HandleAssignTask(c *gin.Context) {
@@ -51,8 +51,8 @@ func HandleAssignTask(c *gin.Context) {
 		msg := fmt.Sprintf("parse assign error: %s", err)
 		logger.Error(msg)
 		c.JSON(http.StatusBadRequest, Response{
-			StatusCode: StatusError,
-			Msg:        msg,
+			Signal: SignalError,
+			Msg:    msg,
 		})
 		return
 	}
@@ -60,16 +60,16 @@ func HandleAssignTask(c *gin.Context) {
 	store := GetMachineStore()
 	machine, ok := store.GetWithType(taskAssign.MachinePath)
 	if !ok {
-		c.JSON(StatusOk, Response{StatusCode: StatusError, Msg: "no machine mapping"})
+		c.JSON(SignalOk, Response{Signal: SignalError, Msg: "no machine mapping"})
 		return
 	}
 
 	task := machine.PopHeadTask()
 	if task != nil {
-		c.JSON(StatusOk, Response{StatusCode: StatusOk, Data: task})
+		c.JSON(SignalOk, Response{Signal: SignalOk, Data: task})
 		return
 	}
 
 	// default
-	c.JSON(http.StatusOK, Response{StatusCode: StatusOk, Msg: "no task need to run"})
+	c.JSON(http.StatusOK, Response{Signal: SignalOk, Msg: "no task need to run"})
 }

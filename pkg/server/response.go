@@ -1,9 +1,9 @@
 package server
 
 type Response struct {
-	StatusCode int         `json:"code"`
-	Msg        string      `json:"msg"`
-	Data       interface{} `json:"data"`
+	Signal int         `json:"signal"`
+	Msg    string      `json:"msg"`
+	Data   interface{} `json:"data"`
 }
 
 type TaskResponse struct {
@@ -11,9 +11,12 @@ type TaskResponse struct {
 	Data Task `json:"data"`
 }
 
+// these signs will tell agents about what they should do
 const (
-	StatusError   = -1
-	StatusOk      = 0
-	StatusSync    = 1
-	StatusNewTask = 2
+	// SignalError something wrong, check the msg in resp
+	SignalError = -1
+	// SignalOk need nothing to do
+	SignalOk = 0
+	// SignalNewTask new task arrived
+	SignalNewTask = 1
 )

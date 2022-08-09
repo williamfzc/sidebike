@@ -17,7 +17,7 @@ func HandlePing(c *gin.Context) {
 		if machine, ok := store.GetWithType(machinePath); ok {
 			if !machine.IsEmptyTaskQueue() {
 				c.JSON(http.StatusOK, Response{
-					StatusCode: StatusNewTask,
+					Signal: SignalNewTask,
 				})
 				return
 			}
@@ -26,7 +26,7 @@ func HandlePing(c *gin.Context) {
 
 	// normal
 	c.JSON(http.StatusOK, Response{
-		StatusCode: StatusOk,
-		Msg:        "pong: " + machinePath,
+		Signal: SignalOk,
+		Msg:    "pong: " + machinePath,
 	})
 }
