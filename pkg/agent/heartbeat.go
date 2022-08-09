@@ -36,7 +36,7 @@ func (agent *Agent) triggerHeartBeat() {
 	}
 	switch resp.StatusCode {
 	case server.StatusNewTask:
-		agent.taskRequestQueue <- TaskRequestEvent{}
+		agent.taskRequestQueue <- &Event{}
 		logger.Infof("found new task, trying to request")
 	default:
 		logger.Debugf("heartbeat: %s", resp)
