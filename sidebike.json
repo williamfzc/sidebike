@@ -3,5 +3,7 @@
     "address": "127.0.0.1",
     "port": 9410
   },
-  "period": 5
+  "period": 5,
+  "groupLabel": "myTeamGroup",
+  "machineLabel": "myMachine1"
 }

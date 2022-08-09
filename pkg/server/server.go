@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/williamfzc/sidebike/pkg/server/controllers/lifecycle"
 )
 
 type Server struct {
@@ -20,5 +19,5 @@ func (server *Server) Execute() {
 }
 
 func initRouter(engine *gin.Engine) {
-	lifecycle.BuildController(engine)
+	BuildController(engine)
 }
