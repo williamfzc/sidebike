@@ -2,23 +2,18 @@ package server
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-const Prefix = "/api/lifecycle"
+const PrefixLifecycle = "/api/lifecycle"
 const FieldMachineLabel = "path"
 
-func withPrefix(old string) string {
-	return fmt.Sprintf("%s%s", Prefix, old)
+func withLifecyclePrefix(old string) string {
+	return fmt.Sprintf("%s%s", PrefixLifecycle, old)
 }
 
 var Ping = &Mapping{
 	HttpMethod: http.MethodGet,
-	Path:       withPrefix("/ping"),
+	Path:       withLifecyclePrefix("/ping"),
 	Handler:    HandlePing,
-}
-
-func BuildController(engine *gin.Engine) {
-	Ping.Add2Engine(engine)
 }

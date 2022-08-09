@@ -7,8 +7,24 @@ import (
 
 func HandlePing(c *gin.Context) {
 	machinePath := c.Query(FieldMachineLabel)
-	GetStore().Add(machinePath, nil)
 
+	// update machine store
+	store := GetMachineStore()
+	if !store.Contains(machinePath) {
+		machine := &Machine{machinePath, &TaskQueue{}}
+		store.Add(machinePath, machine)
+	} else {
+		if machine, ok := store.GetWithType(machinePath); ok {
+			if !machine.IsEmptyTaskQueue() {
+				c.JSON(http.StatusOK, Response{
+					StatusCode: StatusNewTask,
+				})
+				return
+			}
+		}
+	}
+
+	// normal
 	c.JSON(http.StatusOK, Response{
 		StatusCode: StatusOk,
 		Msg:        "pong: " + machinePath,

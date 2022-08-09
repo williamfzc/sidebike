@@ -28,9 +28,7 @@ var agentCmd = &cobra.Command{
 		}
 
 		// start up
-		agentInst := &agent.Agent{
-			Config: agentConfig,
-		}
+		agentInst := agent.CreateAgent(agentConfig)
 		agentInst.Run()
 	},
 }

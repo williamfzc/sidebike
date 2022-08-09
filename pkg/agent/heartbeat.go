@@ -34,7 +34,13 @@ func (agent *Agent) triggerHeartBeat() {
 	if err != nil {
 		return
 	}
-	logger.Infof("heartbeat: %s", resp)
+	switch resp.StatusCode {
+	case server.StatusNewTask:
+		agent.taskRequestQueue <- TaskRequestEvent{}
+		logger.Infof("found new task, trying to request")
+	default:
+		logger.Debugf("heartbeat: %s", resp)
+	}
 }
 
 func (agent *Agent) requestHeartBeat() (*server.Response, error) {
