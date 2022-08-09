@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/go-cmd/cmd"
 	"github.com/williamfzc/sidebike/pkg/server"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
+	"time"
 )
 
 func (agent *Agent) GetTaskRequestUrl() (*url.URL, error) {
@@ -46,7 +49,7 @@ func (agent *Agent) taskRequestMonitor() {
 			continue
 		}
 
-		responseObj := &server.Response{}
+		responseObj := &server.TaskResponse{}
 		err = json.Unmarshal(data, responseObj)
 		if err != nil {
 			logger.Errorf("invalid response format: %s", err)
@@ -57,6 +60,17 @@ func (agent *Agent) taskRequestMonitor() {
 			continue
 		}
 
-		logger.Infof("ready to run task %s", responseObj.Data)
+		task := responseObj.Data
+		logger.Infof("ready to run task %s", task)
+
+		fullPath := strings.Split(task.Detail.Command, " ")
+		logger.Infof("run shell: %s", fullPath)
+		userCmd := cmd.NewCmd("bash", append([]string{"-c"}, fullPath...)...)
+		go func() {
+			<-time.After(time.Duration(task.Detail.Timeout) * time.Second)
+			_ = userCmd.Stop()
+		}()
+		status := <-userCmd.Start()
+		logger.Infof("task done: %s", status)
 	}
 }

@@ -10,16 +10,17 @@ type Server struct {
 }
 
 func (server *Server) Execute() {
-	router := gin.Default()
-	initRouter(router)
+	router := initRouter()
 	err := router.Run(fmt.Sprintf(":%d", server.Port))
 	if err != nil {
 		fmt.Printf("failed to start server: %s", err.Error())
 	}
 }
 
-func initRouter(engine *gin.Engine) {
+func initRouter() *gin.Engine {
+	engine := gin.Default()
 	Ping.Add2Engine(engine)
 	PostTask.Add2Engine(engine)
 	AssignTask.Add2Engine(engine)
+	return engine
 }

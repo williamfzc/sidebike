@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.8.1
+	github.com/go-cmd/cmd v1.4.1
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0

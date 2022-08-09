@@ -6,6 +6,11 @@ type Response struct {
 	Data       interface{} `json:"data"`
 }
 
+type TaskResponse struct {
+	*Response
+	Data Task `json:"data"`
+}
+
 const (
 	StatusError   = -1
 	StatusOk      = 0

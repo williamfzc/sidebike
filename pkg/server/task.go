@@ -1,10 +1,16 @@
 package server
 
 type Task struct {
-	Name           string
-	Type           int
-	MachinePattern string
-	Status         int
+	Name           string     `json:"name"`
+	Type           int        `json:"type"`
+	MachinePattern string     `json:"machinePattern"`
+	Status         int        `json:"status"`
+	Detail         TaskDetail `json:"detail"`
+}
+
+type TaskDetail struct {
+	Command string `json:"command"`
+	Timeout int    `json:"timeout"`
 }
 
 type TaskQueue []*Task
@@ -24,6 +30,7 @@ func CreateNewTask() *Task {
 
 const TaskTypeCmd = 0
 
+// todo
 const TaskStatusNew = 0
 const TaskStatusAssigned = 1
 const TaskStatusDoing = 2
