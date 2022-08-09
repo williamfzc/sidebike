@@ -22,5 +22,6 @@ func (agent *Agent) Run() {
 	go agent.taskWorkMonitor()
 	go agent.taskRequestMonitor()
 	go agent.heartBeat()
+	logger.Infof("sidebike agent started")
 	select {}
 }

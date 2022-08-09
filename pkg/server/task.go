@@ -9,15 +9,12 @@ type Task struct {
 }
 
 type TaskDetail struct {
-	Command string `json:"command"`
-	Timeout int    `json:"timeout"`
+	Command string   `json:"command"`
+	Timeout int      `json:"timeout"`
+	Result  []string `json:"result"`
 }
 
 type TaskQueue []*Task
-
-type TaskAssign struct {
-	MachinePath string
-}
 
 func CreateNewTask() *Task {
 	return &Task{
@@ -30,9 +27,7 @@ func CreateNewTask() *Task {
 
 const TaskTypeCmd = 0
 
-// todo
 const TaskStatusNew = 0
 const TaskStatusAssigned = 1
-const TaskStatusDoing = 2
-const TaskStatusFinished = 3
-const TaskStatusError = 4
+const TaskStatusFinished = 2
+const TaskStatusError = 3

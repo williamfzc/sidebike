@@ -10,8 +10,16 @@ import (
 	"net/url"
 )
 
-func (agent *Agent) GetTaskRequestUrl() (*url.URL, error) {
+func (agent *Agent) GetUrlTaskRequest() (*url.URL, error) {
 	ret, err := url.Parse(fmt.Sprintf("http://%s%s", agent.GetRegistry(), server.AssignTask.Path))
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func (agent *Agent) GetUrlTaskDone() (*url.URL, error) {
+	ret, err := url.Parse(fmt.Sprintf("http://%s%s", agent.GetRegistry(), server.DoneTask.Path))
 	if err != nil {
 		return nil, err
 	}
@@ -22,14 +30,14 @@ func (agent *Agent) taskRequestMonitor() {
 	for {
 		<-agent.taskRequestQueue
 
-		finalUrl, err := agent.GetTaskRequestUrl()
+		finalUrl, err := agent.GetUrlTaskRequest()
 		if err != nil {
 			logger.Errorf("failed to gen task url: %s", err)
 			continue
 		}
 
 		// todo: offer enough info for server to make decision
-		requestJson := &server.TaskAssign{
+		requestJson := &server.TaskAssignRequest{
 			MachinePath: agent.GetMachinePath(),
 		}
 		jsonStr, _ := json.Marshal(requestJson)

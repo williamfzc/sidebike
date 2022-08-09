@@ -40,7 +40,7 @@ func (agent *Agent) triggerHeartBeat() {
 		agent.taskRequestQueue <- &Event{}
 		logger.Infof("found new task. trying to request")
 	default:
-		logger.Debugf("heartbeat: %s", resp)
+		logger.Debugf("heartbeat: %v", resp)
 	}
 }
 

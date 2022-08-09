@@ -31,6 +31,9 @@ func HandlePostTask(c *gin.Context) {
 		return
 	}
 
+	// ok this task is valid, save it
+	GetTaskStore().Add(newTask.Name, newTask)
+
 	store := GetMachineStore()
 	logger.Debugf("matching machines: %s", compiled)
 	for _, machinePath := range store.Keys() {
@@ -45,8 +48,8 @@ func HandlePostTask(c *gin.Context) {
 }
 
 func HandleAssignTask(c *gin.Context) {
-	taskAssign := &TaskAssign{}
-	err := c.BindJSON(taskAssign)
+	taskAssignRequest := &TaskAssignRequest{}
+	err := c.BindJSON(taskAssignRequest)
 	if err != nil {
 		msg := fmt.Sprintf("parse assign error: %s", err)
 		logger.Error(msg)
@@ -58,7 +61,7 @@ func HandleAssignTask(c *gin.Context) {
 	}
 
 	store := GetMachineStore()
-	machine, ok := store.GetWithType(taskAssign.MachinePath)
+	machine, ok := store.GetWithType(taskAssignRequest.MachinePath)
 	if !ok {
 		c.JSON(SignalOk, Response{Signal: SignalError, Msg: "no machine mapping"})
 		return
@@ -72,4 +75,28 @@ func HandleAssignTask(c *gin.Context) {
 
 	// default
 	c.JSON(http.StatusOK, Response{Signal: SignalOk, Msg: "no task need to run"})
+}
+
+func HandleDoneTask(c *gin.Context) {
+	taskDoneRequest := &TaskDoneRequest{}
+	err := c.BindJSON(taskDoneRequest)
+	if err != nil {
+		msg := fmt.Sprintf("parse task request error: %s", err)
+		logger.Error(msg)
+		c.JSON(http.StatusBadRequest, Response{
+			Signal: SignalError,
+			Msg:    msg,
+		})
+		return
+	}
+
+	// todo: name will conflict
+	task, ok := GetTaskStore().GetWithType(taskDoneRequest.TaskName)
+	if ok {
+		logger.Infof("update task status to: %d", taskDoneRequest.TaskStatus)
+		logger.Infof("task output: %s", taskDoneRequest.TaskResult)
+		task.Status = taskDoneRequest.TaskStatus
+		task.Detail.Result = taskDoneRequest.TaskResult
+	}
+	c.JSON(http.StatusOK, Response{Signal: SignalOk})
 }

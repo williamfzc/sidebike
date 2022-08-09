@@ -19,8 +19,13 @@ func (server *Server) Execute() {
 
 func initRouter() *gin.Engine {
 	engine := gin.Default()
+
+	// lifecycle
 	Ping.Add2Engine(engine)
+	// task
 	PostTask.Add2Engine(engine)
 	AssignTask.Add2Engine(engine)
+	DoneTask.Add2Engine(engine)
+
 	return engine
 }
