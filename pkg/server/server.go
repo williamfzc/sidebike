@@ -6,11 +6,16 @@ import (
 )
 
 type Server struct {
-	Port int
+	*Config
 }
 
-func CreateNewServer(port int) *Server {
-	return &Server{port}
+func CreateNewServer(config *Config) *Server {
+	// default values
+	if config.Port == 0 {
+		config.Port = 9410
+	}
+
+	return &Server{config}
 }
 
 func (s *Server) Execute() {
