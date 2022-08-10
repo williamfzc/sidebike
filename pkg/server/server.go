@@ -28,6 +28,8 @@ func initRouter() *gin.Engine {
 	AssignTask.Add2Engine(engine)
 	DoneTask.Add2Engine(engine)
 	QueryTask.Add2Engine(engine)
+	// machine
+	QueryMachine.Add2Engine(engine)
 
 	return engine
 }
