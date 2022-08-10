@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/williamfzc/sidebike/pkg/agent"
+	"os"
 )
 
 var agentCmd = &cobra.Command{
@@ -25,6 +26,12 @@ var agentCmd = &cobra.Command{
 		err = viper.Unmarshal(agentConfig)
 		if err != nil {
 			return
+		}
+
+		// agent name
+		labelFromEnv, ok := os.LookupEnv("SIDEBIKE_AGENT_NAME")
+		if ok {
+			agentConfig.MachineLabel = labelFromEnv
 		}
 
 		// start up

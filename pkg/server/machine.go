@@ -1,10 +1,36 @@
 package server
 
-import "sync"
+import (
+	"sync"
+	"time"
+)
 
 type Machine struct {
-	Label     string
-	TaskQueue *TaskQueue
+	Label           string        `json:"label"`
+	TaskQueue       *TaskQueue    `json:"taskQueue"`
+	Status          MachineStatus `json:"status"`
+	FirstAliveTime  time.Time     `json:"firstAliveTime"`
+	LatestAliveTime time.Time     `json:"latestAliveTime"`
+}
+
+func CreateNewMachine(label string) *Machine {
+	now := time.Now()
+	return &Machine{
+		Label:           label,
+		TaskQueue:       &TaskQueue{},
+		Status:          MachineStatusNew,
+		FirstAliveTime:  now,
+		LatestAliveTime: now,
+	}
+}
+
+func (machine *Machine) UpdateTime() {
+	machine.Status = MachineStatusOnline
+	machine.LatestAliveTime = time.Now()
+}
+
+func (machine *Machine) IsAlive() bool {
+	return time.Now().Sub(machine.LatestAliveTime) < time.Minute
 }
 
 func (machine *Machine) AppendTask(task *Task) {
@@ -32,3 +58,11 @@ func (machine *Machine) PopHeadTask() *Task {
 	ret, *machine.TaskQueue = (*machine.TaskQueue)[0], (*machine.TaskQueue)[1:]
 	return ret
 }
+
+type MachineStatus int
+
+const (
+	MachineStatusOffline MachineStatus = -1
+	MachineStatusNew     MachineStatus = 0
+	MachineStatusOnline  MachineStatus = 1
+)

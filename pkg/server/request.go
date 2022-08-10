@@ -1,11 +1,11 @@
 package server
 
 type TaskAssignRequest struct {
-	MachinePath string
+	MachineLabel string
 }
 
 type TaskDoneRequest struct {
 	TaskName   string
-	TaskStatus int
+	TaskStatus TaskStatus
 	TaskResult []string
 }

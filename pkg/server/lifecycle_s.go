@@ -11,10 +11,11 @@ func HandlePing(c *gin.Context) {
 	// update machine store
 	store := GetMachineStore()
 	if !store.Contains(machinePath) {
-		machine := &Machine{machinePath, &TaskQueue{}}
+		machine := CreateNewMachine(machinePath)
 		store.Add(machinePath, machine)
 	} else {
 		if machine, ok := store.GetWithType(machinePath); ok {
+			machine.UpdateTime()
 			if !machine.IsEmptyTaskQueue() {
 				c.JSON(http.StatusOK, Response{
 					Signal: SignalNewTask,

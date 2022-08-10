@@ -38,7 +38,7 @@ func (agent *Agent) taskRequestMonitor() {
 
 		// todo: offer enough info for server to make decision
 		requestJson := &server.TaskAssignRequest{
-			MachinePath: agent.GetMachinePath(),
+			MachineLabel: agent.MachineLabel,
 		}
 		jsonStr, _ := json.Marshal(requestJson)
 

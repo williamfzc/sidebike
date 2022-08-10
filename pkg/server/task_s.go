@@ -64,7 +64,7 @@ func HandleAssignTask(c *gin.Context) {
 	}
 
 	store := GetMachineStore()
-	machine, ok := store.GetWithType(taskAssignRequest.MachinePath)
+	machine, ok := store.GetWithType(taskAssignRequest.MachineLabel)
 	if !ok {
 		c.JSON(SignalOk, Response{Signal: SignalError, Msg: "no machine mapping"})
 		return

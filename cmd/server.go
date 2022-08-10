@@ -7,16 +7,14 @@ import (
 )
 
 var serverCmd = &cobra.Command{
-	Use:   "server",
-	Short: "test",
-	Long:  `test`,
+	Use:    "server",
+	Short:  "test",
+	Long:   `test`,
 	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Server cmd")
-		server := &server.Server{
-			Port: 9410,
-		}
-		server.Execute()
+		serverInst := server.CreateNewServer(9410)
+		serverInst.Execute()
 	},
 }
 

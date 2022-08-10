@@ -11,11 +11,9 @@ type RegistryConfig struct {
 }
 
 type Config struct {
-	Registry RegistryConfig `json:"registry"`
-	Period   int            `json:"period"`
-
-	GroupLabel   string `json:"groupLabel"`
-	MachineLabel string `json:"machineLabel"`
+	Registry     RegistryConfig `json:"registry"`
+	Period       int            `json:"period"`
+	MachineLabel string         `json:"machineLabel"`
 }
 
 func (c *Config) GetPeriod() time.Duration {
@@ -24,8 +22,4 @@ func (c *Config) GetPeriod() time.Duration {
 
 func (c *Config) GetRegistry() string {
 	return fmt.Sprintf("%s:%d", c.Registry.Address, c.Registry.Port)
-}
-
-func (c *Config) GetMachinePath() string {
-	return fmt.Sprintf("%s/%s", c.GroupLabel, c.MachineLabel)
 }

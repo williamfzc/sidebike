@@ -16,7 +16,7 @@ func (agent *Agent) GetUrlPing() (*url.URL, error) {
 		return nil, err
 	}
 	params := url.Values{}
-	params.Add(server.FieldMachineLabel, agent.GetMachinePath())
+	params.Add(server.FieldMachineLabel, agent.MachineLabel)
 	ret.RawQuery = params.Encode()
 	return ret, nil
 }

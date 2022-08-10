@@ -16,9 +16,23 @@ func (agent *Agent) taskWorkMonitor() {
 	for {
 		task := <-agent.taskTodoQueue
 
-		fullPath := task.Detail.Command
-		logger.Infof("run shell: %s", fullPath)
-		userCmd := cmd.NewCmd("bash", "-c", fullPath)
+		commandToRun := task.Detail.Command
+		ok := verifyCommand(commandToRun)
+		if !ok {
+			task.Status = server.TaskStatusError
+			task.Detail.Result = []string{"command verify error"}
+			agent.UpdateTaskStatus(task)
+			continue
+		}
+
+		logger.Infof("run shell: %s", commandToRun)
+		userCmd := cmd.NewCmd("bash", "-c", commandToRun)
+
+		workspace := task.Detail.Workspace
+		if workspace != "" {
+			userCmd.Dir = workspace
+		}
+
 		go func() {
 			<-time.After(time.Duration(task.Detail.Timeout) * time.Second)
 			_ = userCmd.Stop()
@@ -78,4 +92,9 @@ func (agent *Agent) UpdateTaskStatus(task *server.Task) {
 		logger.Errorf("status not ok")
 		return
 	}
+}
+
+func verifyCommand(command string) bool {
+	// todo: some sensitive commands
+	return true
 }
