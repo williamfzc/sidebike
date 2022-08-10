@@ -24,8 +24,10 @@ func initRouter() *gin.Engine {
 	Ping.Add2Engine(engine)
 	// task
 	PostTask.Add2Engine(engine)
+	NewTask.Add2Engine(engine)
 	AssignTask.Add2Engine(engine)
 	DoneTask.Add2Engine(engine)
+	QueryTask.Add2Engine(engine)
 
 	return engine
 }

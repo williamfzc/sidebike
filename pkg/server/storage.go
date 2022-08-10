@@ -1,6 +1,8 @@
 package server
 
-import lru "github.com/hashicorp/golang-lru"
+import (
+	lru "github.com/hashicorp/golang-lru"
+)
 
 type Store[T any] struct {
 	*lru.Cache
@@ -20,6 +22,17 @@ func GetTaskStore() *Store[Task] {
 func (store *Store[T]) GetWithType(key interface{}) (*T, bool) {
 	ret, ok := store.Get(key)
 	return ret.(*T), ok
+}
+
+func (store *Store[T]) GetAll() []*T {
+	var ret []*T
+	for _, each := range store.Keys() {
+		item, ok := store.GetWithType(each)
+		if ok {
+			ret = append(ret, item)
+		}
+	}
+	return ret
 }
 
 func init() {

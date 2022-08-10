@@ -5,7 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"regexp"
+	"strings"
 )
+
+const FieldTaskPrefix = "taskPrefix"
 
 func HandlePostTask(c *gin.Context) {
 	newTask := CreateNewTask()
@@ -99,4 +102,22 @@ func HandleDoneTask(c *gin.Context) {
 		task.Detail.Result = taskDoneRequest.TaskResult
 	}
 	c.JSON(http.StatusOK, Response{Signal: SignalOk})
+}
+
+func HandleQueryTask(c *gin.Context) {
+	taskPrefix := c.Query(FieldTaskPrefix)
+	tasks := GetTaskStore().GetAll()
+	if taskPrefix == "" {
+		c.JSON(http.StatusOK, Response{Signal: SignalOk, Data: tasks})
+		return
+	}
+
+	var tasksAfterFilter []*Task
+	for i := range tasks {
+		item := tasks[i]
+		if strings.HasPrefix(item.Name, taskPrefix) {
+			tasksAfterFilter = append(tasksAfterFilter, item)
+		}
+	}
+	c.JSON(http.StatusOK, Response{Signal: SignalOk, Data: tasksAfterFilter})
 }

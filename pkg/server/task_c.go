@@ -17,6 +17,12 @@ var PostTask = &Mapping{
 	Handler:    HandlePostTask,
 }
 
+var NewTask = &Mapping{
+	HttpMethod: http.MethodPost,
+	Path:       withTaskPrefix("/status/new"),
+	Handler:    HandlePostTask,
+}
+
 var AssignTask = &Mapping{
 	HttpMethod: http.MethodPost,
 	Path:       withTaskPrefix("/status/assigned"),
@@ -27,4 +33,10 @@ var DoneTask = &Mapping{
 	HttpMethod: http.MethodPost,
 	Path:       withTaskPrefix("/status/done"),
 	Handler:    HandleDoneTask,
+}
+
+var QueryTask = &Mapping{
+	HttpMethod: http.MethodGet,
+	Path:       withTaskPrefix("/"),
+	Handler:    HandleQueryTask,
 }
