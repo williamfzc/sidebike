@@ -1,0 +1,4 @@
+builds:
+  goos:
+    # pack linux only
+    - linux
