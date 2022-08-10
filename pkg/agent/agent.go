@@ -14,9 +14,19 @@ type Agent struct {
 type Event struct{}
 
 func CreateAgent(config *Config) *Agent {
+	// handle some default values
 	if config.MachineLabel == "" {
 		config.MachineLabel = uuid.New().String()
 		logger.Warnf("no machineLabel found, use random name: %s", config.MachineLabel)
+	}
+	if config.Period == 0 {
+		config.Period = 15
+	}
+	if config.Registry.Address == "" {
+		config.Registry.Address = "127.0.0.1"
+	}
+	if config.Registry.Port == 0 {
+		config.Registry.Port = 9410
 	}
 
 	return &Agent{

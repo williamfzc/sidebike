@@ -1,11 +1,15 @@
 package cmd
 
 import (
+	"encoding/json"
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/williamfzc/sidebike/pkg/agent"
-	"os"
 )
+
+const ConfigFileName = "sidebike.json"
 
 var agentCmd = &cobra.Command{
 	Use:    "agent",
@@ -15,7 +19,7 @@ var agentCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// config file
 		viper.AddConfigPath(".")
-		viper.SetConfigFile("sidebike.json")
+		viper.SetConfigFile(ConfigFileName)
 		err := viper.ReadInConfig()
 		if err != nil {
 			return
@@ -34,8 +38,15 @@ var agentCmd = &cobra.Command{
 			agentConfig.MachineLabel = labelFromEnv
 		}
 
-		// start up
 		agentInst := agent.CreateAgent(agentConfig)
+		// save config back
+		appliedConfig, err := json.MarshalIndent(&agentInst.Config, "", "  ")
+		if err != nil {
+			// ignore
+		}
+		_ = os.WriteFile(ConfigFileName, appliedConfig, 0644)
+
+		// start up
 		agentInst.Run()
 	},
 }

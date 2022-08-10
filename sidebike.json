@@ -3,5 +3,6 @@
     "address": "127.0.0.1",
     "port": 9410
   },
+  "period": 15,
   "machineLabel": "sidebike-sample-machine-a"
 }
