@@ -7,17 +7,18 @@ import (
 	"github.com/williamfzc/sidebike/pkg/server"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 )
+
+const ResultLineLimit = 30
 
 func (agent *Agent) taskWorkMonitor() {
 	for {
 		task := <-agent.taskTodoQueue
 
-		fullPath := strings.Split(task.Detail.Command, " ")
+		fullPath := task.Detail.Command
 		logger.Infof("run shell: %s", fullPath)
-		userCmd := cmd.NewCmd("bash", append([]string{"-c"}, fullPath...)...)
+		userCmd := cmd.NewCmd("bash", "-c", fullPath)
 		go func() {
 			<-time.After(time.Duration(task.Detail.Timeout) * time.Second)
 			_ = userCmd.Stop()
@@ -31,7 +32,11 @@ func (agent *Agent) taskWorkMonitor() {
 			task.Status = server.TaskStatusError
 		}
 
-		task.Detail.Result = userCmd.Status().Stdout
+		stdoutRet := userCmd.Status().Stdout
+		if len(stdoutRet) > ResultLineLimit {
+			stdoutRet = stdoutRet[ResultLineLimit:]
+		}
+		task.Detail.Result = stdoutRet
 		agent.UpdateTaskStatus(task)
 	}
 }
