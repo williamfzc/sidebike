@@ -1,6 +1,9 @@
 package agent
 
-import "github.com/williamfzc/sidebike/pkg/server"
+import (
+	"github.com/google/uuid"
+	"github.com/williamfzc/sidebike/pkg/server"
+)
 
 type Agent struct {
 	taskRequestQueue chan *Event
@@ -11,6 +14,11 @@ type Agent struct {
 type Event struct{}
 
 func CreateAgent(config *Config) *Agent {
+	if config.MachineLabel == "" {
+		config.MachineLabel = uuid.New().String()
+		logger.Warnf("no machineLabel found, use random name: %s", config.MachineLabel)
+	}
+
 	return &Agent{
 		make(chan *Event),
 		make(chan *server.Task),
