@@ -9,8 +9,6 @@ type Task struct {
 }
 
 type TaskDetail struct {
-	// todo: duplicated!
-	Name      string         `json:"name"`
 	Command   string         `json:"command"`
 	Workspace string         `json:"workspace"`
 	Timeout   int            `json:"timeout"`
