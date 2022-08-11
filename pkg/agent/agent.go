@@ -1,6 +1,8 @@
 package agent
 
 import (
+	"os/user"
+
 	"github.com/google/uuid"
 	"github.com/williamfzc/sidebike/pkg/server"
 )
@@ -38,9 +40,27 @@ func CreateAgent(config *Config) *Agent {
 }
 
 func (agent *Agent) Run() {
+	// pre check
+	if !preCheck() {
+		return
+	}
+
 	go agent.StartTaskWorkMonitor()
 	go agent.StartTaskRequestMonitor()
 	go agent.StartHeartBeatMonitor()
 	logger.Infof("sidebike agent started")
 	select {}
+}
+
+func preCheck() bool {
+	current, err := user.Current()
+	if err != nil {
+		logger.Errorf("pre check error: %s", err)
+		return false
+	}
+	if current.Username == "root" {
+		logger.Errorf("should not start agent with root because of security!")
+		return false
+	}
+	return true
 }
