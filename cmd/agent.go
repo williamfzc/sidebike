@@ -35,10 +35,16 @@ var agentCmd = &cobra.Command{
 		}
 
 		// agent name
-		labelFromEnv, ok := os.LookupEnv("SIDEBIKE_AGENT_NAME")
+		labelFromEnv, ok := os.LookupEnv("SIDEBIKE_MACHINE_LABEL")
 		if ok {
 			logger.Infof("read custom agent name from env: %s", labelFromEnv)
 			agentConfig.MachineLabel = labelFromEnv
+		}
+		// registry
+		registryAddressFromEnv, ok := os.LookupEnv("SIDEBIKE_REGISTRY_ADDRESS")
+		if ok {
+			logger.Infof("read custom address from env: %s", registryAddressFromEnv)
+			agentConfig.Registry.Address = registryAddressFromEnv
 		}
 
 		agentInst := agent.CreateAgent(agentConfig)
