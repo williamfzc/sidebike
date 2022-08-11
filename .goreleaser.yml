@@ -1,7 +1,18 @@
 builds:
-  - id: linux-build
+  - id: linux-amd64
+    binary: sidebike-linux-{{ .Arch }}
+    main: ./sidebike.go
     goos:
       - linux
     goarch:
       - amd64
+    no_unique_dist_dir: true
+
+  - id: linux-arm64
+    binary: sidebike-linux-{{ .Arch }}
+    main: ./sidebike.go
+    goos:
+      - linux
+    goarch:
       - arm64
+    no_unique_dist_dir: true
