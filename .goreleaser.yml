@@ -1,4 +1,7 @@
 builds:
-  goos:
-    # pack linux only
-    - linux
+  - id: linux-build
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
