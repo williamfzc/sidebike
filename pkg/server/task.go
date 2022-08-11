@@ -13,6 +13,7 @@ type TaskDetail struct {
 	Workspace string   `json:"workspace"`
 	Timeout   int      `json:"timeout"`
 	Result    []string `json:"result"`
+	Assignee  string   `json:"assignee"`
 }
 
 type TaskQueue []*Task

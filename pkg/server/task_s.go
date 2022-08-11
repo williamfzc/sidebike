@@ -72,6 +72,7 @@ func HandleAssignTask(c *gin.Context) {
 
 	task := machine.PopHeadTask()
 	if task != nil {
+		task.Detail.Assignee = machine.Label
 		c.JSON(SignalOk, Response{Signal: SignalOk, Data: task})
 		return
 	}
