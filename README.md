@@ -39,8 +39,105 @@
 - 类似rq的发布订阅管理
 - agent / worker 没有额外依赖，最好是个二进制包
 - 不要中间件
+- 可选的db
+- agent不要开端口
 
 That's it.
+
+## 使用
+
+定位很清晰，使用也很清晰。无论agent端与server端都只需要一个二进制包。可以在 [release页面](https://github.com/williamfzc/sidebike/releases) 取得。
+
+### server
+
+先把注册中心的角色部署上。一键：
+
+```bash
+./sidebike server
+```
+
+即可。
+
+```text
+{"level":"info","ts":1660210500.5578532,"caller":"server/server.go:31","msg":"sidebike server started"}
+```
+
+### agent
+
+然后在被控机器上部署。这里假设：
+
+- 你的server刚部署在 10.23.45.67
+- 你的机器叫 MY_MACHINE_1
+
+一键部署：
+
+```bash
+SIDEBIKE_MACHINE_LABEL=MY_MACHINE_1 SIDEBIKE_REGISTRY_ADDRESS=10.23.45.67 ./sidebike agent
+```
+
+即可。
+
+```text
+{"level":"info","ts":1660210450.8167171,"caller":"cmd/agent.go:39","msg":"read custom agent name from env: MY_MACHINE_1"}
+{"level":"info","ts":1660210450.8170285,"caller":"cmd/agent.go:45","msg":"read custom address from env: 10.23.45.67"}
+{"level":"info","ts":1660210450.8193884,"caller":"agent/agent.go:55","msg":"sidebike agent started"}
+```
+
+### 发起任务
+
+建一个 `newtask.json`：
+
+```json
+{
+  "name": "MY_TASK_1",
+  "machinePattern": ".*",
+  "detail": {
+    "command": "ps -ef | grep sidebike",
+    "workspace": "/tmp",
+    "timeout": 15
+  }
+}
+```
+
+直接用 curl 发起：
+
+```bash
+curl -v POST http://10.23.45.67:9410/api/v1/task/ -d @newtask.json --header "Content-Type: application/json;charset=utf-8"
+```
+
+即可查看任务执行结果：
+
+```bash
+curl http://10.23.45.67:9410/api/v1/task
+```
+
+return：
+
+```json
+{
+    "signal": 0,
+    "msg": "",
+    "data": [
+        {
+            "name": "MY_TASK_1",
+            "type": 0,
+            "machinePattern": ".*",
+            "status": 2,
+            "detail": {
+                "command": "ps -ef | grep sidebike",
+                "workspace": "/tmp",
+                "timeout": 15,
+                "result": [
+                    "william+  5808  1745  0 18:01 tty2     00:00:00 ./sidebike agent",
+                    "william+  5817  1777  0 18:01 tty3     00:00:00 ./sidebike server",
+                    "william+  5834  5808  0 18:30 tty2     00:00:00 bash -c ps -ef | grep sidebike",
+                    "william+  5836  5834  0 18:30 tty2     00:00:00 grep sidebike"
+                ]
+            }
+        }
+    ]
+}
+```
 
 ## license
 
