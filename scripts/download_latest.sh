@@ -1,5 +1,5 @@
 #!/bin/bash
-VER=0.2.6
+VER=0.2.7
 ARCH=amd64
 
 ARTIFACT_NAME="sidebike_${VER}_linux_${ARCH}"
