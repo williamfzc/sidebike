@@ -1,8 +1,9 @@
 {
-  "name": "aaa",
+  "name": "MY_TASK_1",
   "machinePattern": ".*",
   "detail": {
-    "command": "ps -ef",
-    "timeout": 10
+    "command": "ps -ef | grep sidebike",
+    "workspace": "/tmp",
+    "timeout": 15
   }
 }

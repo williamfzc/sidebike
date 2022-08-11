@@ -11,7 +11,6 @@ func (s *Server) startMachineMonitor() {
 func (s *Server) startMachineMonitorCheck() {
 	for _, each := range GetMachineStore().GetAll() {
 		if !each.IsAlive() {
-			logger.Infof("machine %s offline", each.Label)
 			each.Status = MachineStatusOffline
 		}
 	}

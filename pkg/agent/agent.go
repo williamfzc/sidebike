@@ -3,6 +3,7 @@ package agent
 import (
 	"os/user"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/williamfzc/sidebike/pkg/server"
 )
@@ -32,6 +33,10 @@ func CreateAgent(config *Config) *Agent {
 		config.Registry.Port = 9410
 	}
 
+	// init router for talking to backend
+	gin.SetMode(gin.ReleaseMode)
+	server.InitRouter(gin.New())
+
 	return &Agent{
 		make(chan *Event),
 		make(chan *server.Task),
@@ -59,8 +64,7 @@ func preCheck() bool {
 		return false
 	}
 	if current.Username == "root" {
-		logger.Errorf("should not start agent with root because of security!")
-		return false
+		logger.Errorf("SHOULD NOT <START AGENT WITH ROOT> BECAUSE OF SECURITY ISSUES")
 	}
 	return true
 }

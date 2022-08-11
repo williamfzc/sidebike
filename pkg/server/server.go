@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,30 +20,39 @@ func CreateNewServer(config *Config) *Server {
 }
 
 func (s *Server) Execute() {
+	// by default
+	if !s.Debug {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	go s.startMachineMonitor()
 
-	router := initRouter()
-	err := router.Run(fmt.Sprintf(":%d", s.Port))
+	engine := gin.Default()
+	InitRouter(engine)
+	logger.Infof("sidebike server started")
+	err := engine.Run(fmt.Sprintf(":%d", s.Port))
 	if err != nil {
 		fmt.Printf("failed to start server: %s", err.Error())
 	}
 }
 
-func initRouter() *gin.Engine {
-	engine := gin.Default()
+func InitRouter(engine *gin.Engine) {
+	rootGroup := engine.Group("/api")
+	v1Group := rootGroup.Group("/v1")
 
 	// lifecycle
-	Ping.Add2Engine(engine)
+	lifeCycleGroup := v1Group.Group("/lifecycle")
+	Ping.Add2Engine(lifeCycleGroup)
 
 	// task
-	PostTask.Add2Engine(engine)
-	NewTask.Add2Engine(engine)
-	AssignTask.Add2Engine(engine)
-	DoneTask.Add2Engine(engine)
-	QueryTask.Add2Engine(engine)
+	taskGroup := v1Group.Group("/task")
+	PostTask.Add2Engine(taskGroup)
+	NewTask.Add2Engine(taskGroup)
+	AssignTask.Add2Engine(taskGroup)
+	DoneTask.Add2Engine(taskGroup)
+	QueryTask.Add2Engine(taskGroup)
 
 	// machine
-	QueryMachine.Add2Engine(engine)
-
-	return engine
+	machineGroup := v1Group.Group("/machine")
+	QueryMachine.Add2Engine(machineGroup)
 }

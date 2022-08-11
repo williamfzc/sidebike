@@ -1,19 +1,22 @@
 package server
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 // sample only
 func TestPingRoute(t *testing.T) {
-	router := initRouter()
+	engine := gin.Default()
+	InitRouter(engine)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, Ping.Path, nil)
-	router.ServeHTTP(w, req)
+	engine.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 }
