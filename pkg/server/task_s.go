@@ -72,7 +72,8 @@ func HandleAssignTask(c *gin.Context) {
 
 	task := machine.PopHeadTask()
 	if task != nil {
-		task.Detail.Assignee = machine.Label
+		task.Detail.Assignees = append(task.Detail.Assignees, machine.Label)
+		task.Status = TaskStatusAssigned
 		c.JSON(SignalOk, Response{Signal: SignalOk, Data: task})
 		return
 	}
@@ -97,10 +98,13 @@ func HandleDoneTask(c *gin.Context) {
 	// todo: name will conflict
 	task, ok := GetTaskStore().GetWithType(taskDoneRequest.TaskName)
 	if ok {
-		logger.Infof("update task status to: %d", taskDoneRequest.TaskStatus)
-		logger.Infof("task output: %s", taskDoneRequest.TaskResult)
-		task.Status = taskDoneRequest.TaskStatus
-		task.Detail.Result = taskDoneRequest.TaskResult
+		agentResult := taskDoneRequest.Result
+		logger.Infof("task %v, agent %v, result: %v",
+			task.Name,
+			agentResult.MachineLabel,
+			agentResult.Status,
+		)
+		task.Detail.Result = append(task.Detail.Result, agentResult)
 	}
 	c.JSON(http.StatusOK, Response{Signal: SignalOk})
 }

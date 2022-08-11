@@ -71,6 +71,6 @@ func (agent *Agent) triggerTaskRequest() {
 	}
 
 	task := responseObj.Data
-	logger.Infof("ready to run task %s", task)
+	logger.Infof("ready to run task %v", task)
 	agent.taskTodoQueue <- &task
 }

@@ -22,11 +22,12 @@ func (agent *Agent) StartTaskWorkMonitor() {
 
 func (agent *Agent) triggerTaskWork(task *server.Task) {
 	commandToRun := task.Detail.Command
+	agentResult := server.CreateNewAgentResult(agent.MachineLabel)
 	ok := verifyCommand(commandToRun)
 	if !ok {
-		task.Status = server.TaskStatusError
-		task.Detail.Result = []string{"command verify error"}
-		agent.updateTaskStatus(task)
+		agentResult.Status = server.AgentStatusError
+		agentResult.Msg = "command verify error"
+		agent.updateTaskStatus(task, agentResult)
 		return
 	}
 
@@ -43,23 +44,23 @@ func (agent *Agent) triggerTaskWork(task *server.Task) {
 		_ = userCmd.Stop()
 	}()
 	status := <-userCmd.Start()
-	logger.Infof("task done: %v", status)
+	logger.Infof("taskDetail done: %v", status)
 
 	if status.Exit == 0 {
-		task.Status = server.TaskStatusFinished
+		agentResult.Status = server.AgentStatusOk
 	} else {
-		task.Status = server.TaskStatusError
+		agentResult.Status = server.AgentStatusError
 	}
 
 	stdoutRet := userCmd.Status().Stdout
 	if len(stdoutRet) > ResultLineLimit {
 		stdoutRet = stdoutRet[ResultLineLimit:]
 	}
-	task.Detail.Result = stdoutRet
-	agent.updateTaskStatus(task)
+	agentResult.Output = stdoutRet
+	agent.updateTaskStatus(task, agentResult)
 }
 
-func (agent *Agent) updateTaskStatus(task *server.Task) {
+func (agent *Agent) updateTaskStatus(task *server.Task, agentResult *server.AgentResult) {
 	// updateTaskStatus
 	finalUrl, err := agent.GetUrlTaskDone()
 	if err != nil {
@@ -68,9 +69,8 @@ func (agent *Agent) updateTaskStatus(task *server.Task) {
 	}
 
 	requestJson := &server.TaskDoneRequest{
-		TaskName:   task.Name,
-		TaskStatus: task.Status,
-		TaskResult: task.Detail.Result,
+		TaskName: task.Name,
+		Result:   agentResult,
 	}
 	jsonStr, _ := json.Marshal(requestJson)
 

@@ -5,7 +5,6 @@ type TaskAssignRequest struct {
 }
 
 type TaskDoneRequest struct {
-	TaskName   string
-	TaskStatus TaskStatus
-	TaskResult []string
+	TaskName string
+	Result   *AgentResult
 }
