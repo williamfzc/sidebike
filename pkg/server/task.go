@@ -25,6 +25,10 @@ type AgentResult struct {
 	Output       []string          `json:"output"`
 }
 
+func (agentResult *AgentResult) Failed() bool {
+	return agentResult.Status == AgentStatusError
+}
+
 type TaskQueue []*Task
 
 func CreateNewTask() *Task {

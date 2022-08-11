@@ -25,7 +25,8 @@ func (s *Server) Execute() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	go s.startMachineMonitor()
+	go s.StartMachineMonitor()
+	go s.StartTaskMonitor()
 
 	engine := gin.Default()
 	InitRouter(engine)

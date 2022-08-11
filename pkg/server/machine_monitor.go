@@ -1,9 +1,12 @@
 package server
 
-import "time"
+import (
+	"math/rand"
+	"time"
+)
 
-func (s *Server) startMachineMonitor() {
-	for range time.Tick(15 * time.Second) {
+func (s *Server) StartMachineMonitor() {
+	for range time.Tick(time.Duration(rand.Intn(10)) * time.Second) {
 		s.startMachineMonitorCheck()
 	}
 }
