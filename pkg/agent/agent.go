@@ -24,6 +24,7 @@ func CreateAgent(config *Config) *Agent {
 	}
 	if config.Registry.Address == "" {
 		config.Registry.Address = "127.0.0.1"
+		logger.Warn("registry address set to localhost")
 	}
 	if config.Registry.Port == 0 {
 		config.Registry.Port = 9410
@@ -37,9 +38,9 @@ func CreateAgent(config *Config) *Agent {
 }
 
 func (agent *Agent) Run() {
-	go agent.taskWorkMonitor()
-	go agent.taskRequestMonitor()
-	go agent.heartBeat()
+	go agent.StartTaskWorkMonitor()
+	go agent.StartTaskRequestMonitor()
+	go agent.StartHeartBeatMonitor()
 	logger.Infof("sidebike agent started")
 	select {}
 }

@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/williamfzc/sidebike/pkg/server"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/williamfzc/sidebike/pkg/server"
 )
 
 func (agent *Agent) GetUrlTaskRequest() (*url.URL, error) {
@@ -26,47 +27,50 @@ func (agent *Agent) GetUrlTaskDone() (*url.URL, error) {
 	return ret, nil
 }
 
-func (agent *Agent) taskRequestMonitor() {
+func (agent *Agent) StartTaskRequestMonitor() {
 	for {
 		<-agent.taskRequestQueue
-
-		finalUrl, err := agent.GetUrlTaskRequest()
-		if err != nil {
-			logger.Errorf("failed to gen task url: %s", err)
-			continue
-		}
-
-		// todo: offer enough info for server to make decision
-		requestJson := &server.TaskAssignRequest{
-			MachineLabel: agent.MachineLabel,
-		}
-		jsonStr, _ := json.Marshal(requestJson)
-
-		response, err := http.Post(finalUrl.String(), "application/json", bytes.NewBuffer(jsonStr))
-		if err != nil {
-			logger.Errorf("request error: %s", err)
-			continue
-		}
-
-		data, err := io.ReadAll(response.Body)
-		if err != nil {
-			logger.Errorf("read body error: %s", err)
-			continue
-		}
-
-		responseObj := &server.TaskResponse{}
-		err = json.Unmarshal(data, responseObj)
-		if err != nil {
-			logger.Errorf("invalid response format: %s", err)
-			continue
-		}
-		if responseObj.Signal != server.SignalOk {
-			logger.Errorf("status not ok")
-			continue
-		}
-
-		task := responseObj.Data
-		logger.Infof("ready to run task %s", task)
-		agent.taskTodoQueue <- &task
+		agent.triggerTaskRequest()
 	}
+}
+
+func (agent *Agent) triggerTaskRequest() {
+	finalUrl, err := agent.GetUrlTaskRequest()
+	if err != nil {
+		logger.Errorf("failed to gen task url: %s", err)
+		return
+	}
+
+	// todo: offer enough info for server to make decision
+	requestJson := &server.TaskAssignRequest{
+		MachineLabel: agent.MachineLabel,
+	}
+	jsonStr, _ := json.Marshal(requestJson)
+
+	response, err := http.Post(finalUrl.String(), "application/json", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		logger.Errorf("request error: %s", err)
+		return
+	}
+
+	data, err := io.ReadAll(response.Body)
+	if err != nil {
+		logger.Errorf("read body error: %s", err)
+		return
+	}
+
+	responseObj := &server.TaskResponse{}
+	err = json.Unmarshal(data, responseObj)
+	if err != nil {
+		logger.Errorf("invalid response format: %s", err)
+		return
+	}
+	if responseObj.Signal != server.SignalOk {
+		logger.Errorf("status not ok")
+		return
+	}
+
+	task := responseObj.Data
+	logger.Infof("ready to run task %s", task)
+	agent.taskTodoQueue <- &task
 }

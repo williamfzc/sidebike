@@ -3,11 +3,12 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/williamfzc/sidebike/pkg/server"
 	"io"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/williamfzc/sidebike/pkg/server"
 )
 
 func (agent *Agent) GetUrlPing() (*url.URL, error) {
@@ -21,8 +22,8 @@ func (agent *Agent) GetUrlPing() (*url.URL, error) {
 	return ret, nil
 }
 
-// signal only
-func (agent *Agent) heartBeat() {
+// StartHeartBeatMonitor signal only
+func (agent *Agent) StartHeartBeatMonitor() {
 	period := agent.GetPeriod()
 	for range time.Tick(period) {
 		agent.triggerHeartBeat()
