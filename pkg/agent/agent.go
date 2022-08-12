@@ -23,7 +23,7 @@ func CreateAgent(config *Config) *Agent {
 		logger.Warnf("no machineLabel found, use random name: %s", config.MachineLabel)
 	}
 	if config.Period == 0 {
-		config.Period = 15
+		config.Period = 10
 	}
 	if config.Registry.Address == "" {
 		config.Registry.Address = "127.0.0.1"
