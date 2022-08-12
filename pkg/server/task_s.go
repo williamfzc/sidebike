@@ -23,6 +23,7 @@ func HandlePostTask(c *gin.Context) {
 		return
 	}
 
+	logger.Infof("received new task, trying to mapping ...")
 	compiled, err := regexp.Compile(newTask.MachinePattern)
 	if err != nil {
 		msg := fmt.Sprintf("parse pattern error: %s", err)
@@ -35,16 +36,20 @@ func HandlePostTask(c *gin.Context) {
 	}
 
 	// ok this task is valid, save it
-	GetTaskStore().Add(newTask.Name, newTask)
+	GetTaskStore().Set(newTask.Name, newTask)
 
 	store := GetMachineStore()
-	logger.Debugf("matching machines: %s", compiled)
+	logger.Infof("matching machines: %s", compiled)
 	for _, machinePath := range store.Keys() {
-		logger.Debugf("checking machine: %s", machinePath)
-		if compiled.Match([]byte(machinePath.(string))) {
-			logger.Debugf("machine %s matched, append task", machinePath)
-			machine, _ := store.GetWithType(machinePath)
-			machine.SubmitTask(newTask)
+		logger.Info("checking machine: %s", machinePath)
+		if compiled.Match([]byte(machinePath)) {
+			logger.Infof("machine %s matched, append task", machinePath)
+			machine, ok := store.Get(machinePath)
+			if ok {
+				machine.SubmitTask(newTask)
+			} else {
+				logger.Warnf("machine %s offline", machinePath)
+			}
 		}
 	}
 	c.JSON(http.StatusOK, Response{Signal: SignalOk})
@@ -64,7 +69,7 @@ func HandleAssignTask(c *gin.Context) {
 	}
 
 	store := GetMachineStore()
-	machine, ok := store.GetWithType(taskAssignRequest.MachineLabel)
+	machine, ok := store.Get(taskAssignRequest.MachineLabel)
 	if !ok {
 		c.JSON(SignalOk, Response{Signal: SignalError, Msg: "no machine mapping"})
 		return
@@ -96,7 +101,7 @@ func HandleDoneTask(c *gin.Context) {
 	}
 
 	// todo: name will conflict
-	task, ok := GetTaskStore().GetWithType(taskDoneRequest.TaskName)
+	task, ok := GetTaskStore().Get(taskDoneRequest.TaskName)
 	if ok {
 		agentResult := taskDoneRequest.Result
 		logger.Infof("task %v, agent %v, result: %v",
@@ -111,7 +116,7 @@ func HandleDoneTask(c *gin.Context) {
 
 func HandleQueryTask(c *gin.Context) {
 	taskPrefix := c.Query(FieldTaskPrefix)
-	tasks := GetTaskStore().GetAll()
+	tasks := GetTaskStore().Items()
 	if taskPrefix == "" {
 		c.JSON(http.StatusOK, Response{Signal: SignalOk, Data: tasks})
 		return

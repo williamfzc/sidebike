@@ -64,6 +64,7 @@ func (machine *Machine) StartEventWatcher() {
 	for {
 		newEvent, running := <-machine.eventQueue
 		if !running {
+			logger.Infof("machine watcher shut down: %s", machine.Label)
 			return
 		}
 
@@ -72,9 +73,9 @@ func (machine *Machine) StartEventWatcher() {
 			machine.updateTime()
 
 		case MachineEventNewTask:
-			task, ok := newEvent.Data.(Task)
+			task, ok := newEvent.Data.(*Task)
 			if ok {
-				machine.appendTask(&task)
+				machine.appendTask(task)
 			}
 		}
 	}
@@ -115,8 +116,8 @@ func (machine *Machine) PopHeadTask() *Task {
 	defer l.Unlock()
 
 	var ret *Task
-	realQueue := *machine.TaskQueue
-	ret, realQueue = realQueue[0], realQueue[1:]
+	realQueue := machine.TaskQueue
+	ret, *realQueue = (*realQueue)[0], (*realQueue)[1:]
 	return ret
 }
 

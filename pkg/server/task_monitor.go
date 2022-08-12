@@ -12,7 +12,7 @@ func (s *Server) StartTaskMonitor() {
 }
 
 func (s *Server) startTaskMonitorCheck() {
-	for _, each := range GetTaskStore().GetAll() {
+	for _, each := range GetTaskStore().Items() {
 		assigneeNum := len(each.Detail.Assignees)
 
 		// all the results collected

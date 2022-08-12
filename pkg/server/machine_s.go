@@ -6,6 +6,6 @@ import (
 )
 
 func HandleQueryMachine(c *gin.Context) {
-	machines := GetMachineStore().GetAll()
+	machines := GetMachineStore().Items()
 	c.JSON(http.StatusOK, Response{Signal: SignalOk, Data: machines})
 }

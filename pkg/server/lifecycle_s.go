@@ -10,11 +10,11 @@ func HandlePing(c *gin.Context) {
 
 	// update machine store
 	store := GetMachineStore()
-	if !store.Contains(machinePath) {
+	if !store.Has(machinePath) {
 		machine := CreateNewMachine(machinePath)
-		store.Add(machinePath, machine)
+		store.Set(machinePath, machine)
 	} else {
-		if machine, ok := store.GetWithType(machinePath); ok {
+		if machine, ok := store.Get(machinePath); ok {
 			machine.Sync()
 			if !machine.IsEmptyTaskQueue() {
 				c.JSON(http.StatusOK, Response{

@@ -12,7 +12,7 @@ func (s *Server) StartMachineMonitor() {
 }
 
 func (s *Server) startMachineMonitorCheck() {
-	for _, each := range GetMachineStore().GetAll() {
+	for _, each := range GetMachineStore().Items() {
 		if !each.IsAlive() {
 			// todo: clean up?
 		}
