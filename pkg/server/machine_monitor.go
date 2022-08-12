@@ -14,7 +14,7 @@ func (s *Server) StartMachineMonitor() {
 func (s *Server) startMachineMonitorCheck() {
 	for _, each := range GetMachineStore().GetAll() {
 		if !each.IsAlive() {
-			each.Status = MachineStatusOffline
+			// todo: clean up?
 		}
 	}
 }

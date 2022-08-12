@@ -44,7 +44,7 @@ func HandlePostTask(c *gin.Context) {
 		if compiled.Match([]byte(machinePath.(string))) {
 			logger.Debugf("machine %s matched, append task", machinePath)
 			machine, _ := store.GetWithType(machinePath)
-			machine.AppendTask(newTask)
+			machine.SubmitTask(newTask)
 		}
 	}
 	c.JSON(http.StatusOK, Response{Signal: SignalOk})
