@@ -12,9 +12,11 @@ func (s *Server) StartMachineMonitor() {
 }
 
 func (s *Server) startMachineMonitorCheck() {
-	for _, each := range GetMachineStore().Items() {
+	store := GetMachineStore()
+	for k, each := range store.Items() {
 		if !each.IsAlive() {
-			// todo: clean up?
+			store.Remove(k)
+			each.Stop()
 		}
 	}
 }

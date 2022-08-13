@@ -1,6 +1,7 @@
 package server
 
 import (
+	"golang.org/x/net/context"
 	"sync"
 	"time"
 )
@@ -32,9 +33,12 @@ type Machine struct {
 	FirstAliveTime  time.Time     `json:"firstAliveTime"`
 	LatestAliveTime time.Time     `json:"latestAliveTime"`
 	eventQueue      chan *MachineEvent
+	mutex           *sync.Mutex
+	done            *context.CancelFunc
 }
 
 func CreateNewMachine(label string) *Machine {
+	ctx, cancel := context.WithCancel(context.Background())
 	now := time.Now()
 	machine := &Machine{
 		Label:           label,
@@ -43,55 +47,104 @@ func CreateNewMachine(label string) *Machine {
 		FirstAliveTime:  now,
 		LatestAliveTime: now,
 		eventQueue:      make(chan *MachineEvent),
+		mutex:           &sync.Mutex{},
+		done:            &cancel,
 	}
-	go machine.StartEventWatcher()
-	go machine.StartStatusWatcher()
+
+	go machine.StartEventWatcher(ctx)
+	go machine.StartStatusWatcher(ctx)
 	return machine
 }
 
-func (machine *Machine) StartStatusWatcher() {
+func (machine *Machine) StartStatusWatcher(ctx context.Context) {
 	ticker := time.NewTicker(5 * time.Second)
-	defer ticker.Stop()
-	for range ticker.C {
-		if !machine.IsAlive() {
-			logger.Infof("machine %s offline", machine.Label)
-			machine.Status = MachineStatusOffline
+	defer func() {
+		ticker.Stop()
+		logger.Infof("machine %s ticker shutdown", machine.Label)
+	}()
+
+	for {
+		select {
+		case <-ticker.C:
+			if !machine.IsAlive() {
+				logger.Infof("machine %s offline", machine.Label)
+				machine.Status = MachineStatusOffline
+			} else {
+				machine.Status = MachineStatusOnline
+			}
+		case <-ctx.Done():
+			return
 		}
 	}
 }
 
-func (machine *Machine) StartEventWatcher() {
+func (machine *Machine) StartEventWatcher(ctx context.Context) {
+	defer func() {
+		close(machine.eventQueue)
+		logger.Infof("machine %s event queue shutdown", machine.Label)
+	}()
+
 	for {
-		newEvent, running := <-machine.eventQueue
-		if !running {
-			logger.Infof("machine watcher shut down: %s", machine.Label)
-			return
-		}
-
-		switch newEvent.Flag {
-		case MachineEventSync:
-			machine.updateTime()
-
-		case MachineEventNewTask:
-			task, ok := newEvent.Data.(*Task)
-			if ok {
-				machine.appendTask(task)
+		select {
+		case newEvent, running := <-machine.eventQueue:
+			if !running {
+				logger.Infof("machine watcher shut down: %s", machine.Label)
+				return
 			}
+
+			switch newEvent.Flag {
+			case MachineEventSync:
+				machine.updateTime()
+
+			case MachineEventNewTask:
+				task, ok := newEvent.Data.(*Task)
+				if ok {
+					machine.appendTask(task)
+				}
+			}
+		case <-ctx.Done():
+			return
 		}
 	}
 }
 
 func (machine *Machine) Sync() {
+	if machine.Status == MachineStatusOffline {
+		return
+	}
 	machine.eventQueue <- &MachineEvent{MachineEventSync, nil}
 }
 
 func (machine *Machine) SubmitTask(task *Task) {
+	if machine.Status == MachineStatusOffline {
+		return
+	}
 	machine.eventQueue <- &MachineEvent{MachineEventNewTask, task}
 }
 
 func (machine *Machine) Stop() {
-	// todo: improve db first
-	//close(machine.eventQueue)
+	machine.mutex.Lock()
+	defer machine.mutex.Unlock()
+
+	(*machine.done)()
+	logger.Infof("unregister machine %s because of offline", machine.Label)
+}
+
+func (machine *Machine) PopHeadTask() *Task {
+	machine.mutex.Lock()
+	defer machine.mutex.Unlock()
+
+	if machine.IsEmptyTaskQueue() {
+		return nil
+	}
+	if !machine.IsAlive() {
+		return nil
+	}
+
+	var ret *Task
+	realQueue := machine.TaskQueue
+	ret, *realQueue = (*realQueue)[0], (*realQueue)[1:]
+	return ret
 }
 
 func (machine *Machine) IsAlive() bool {
@@ -104,21 +157,6 @@ func (machine *Machine) GetTaskCount() int {
 
 func (machine *Machine) IsEmptyTaskQueue() bool {
 	return machine.GetTaskCount() == 0
-}
-
-func (machine *Machine) PopHeadTask() *Task {
-	if machine.IsEmptyTaskQueue() {
-		return nil
-	}
-
-	var l sync.Mutex
-	l.Lock()
-	defer l.Unlock()
-
-	var ret *Task
-	realQueue := machine.TaskQueue
-	ret, *realQueue = (*realQueue)[0], (*realQueue)[1:]
-	return ret
 }
 
 func (machine *Machine) appendTask(task *Task) {

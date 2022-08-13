@@ -24,6 +24,9 @@ func (agent *Agent) GetUrlPing() (*url.URL, error) {
 
 // StartHeartBeatMonitor signal only
 func (agent *Agent) StartHeartBeatMonitor() {
+	// register at first
+	agent.triggerHeartBeat()
+
 	period := agent.GetPeriod()
 	for range time.Tick(period) {
 		agent.triggerHeartBeat()

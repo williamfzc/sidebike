@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"regexp"
 	"strings"
 )
 
@@ -23,34 +22,13 @@ func HandlePostTask(c *gin.Context) {
 		return
 	}
 
-	logger.Infof("received new task, trying to mapping ...")
-	compiled, err := regexp.Compile(newTask.MachinePattern)
-	if err != nil {
-		msg := fmt.Sprintf("parse pattern error: %s", err)
-		logger.Error(msg)
+	errMsg := DeliverTask(newTask)
+	if errMsg != "" {
 		c.JSON(http.StatusBadRequest, Response{
 			Signal: SignalError,
-			Msg:    msg,
+			Msg:    errMsg,
 		})
 		return
-	}
-
-	// ok this task is valid, save it
-	GetTaskStore().Set(newTask.Name, newTask)
-
-	store := GetMachineStore()
-	logger.Infof("matching machines: %s", compiled)
-	for _, machinePath := range store.Keys() {
-		logger.Info("checking machine: %s", machinePath)
-		if compiled.Match([]byte(machinePath)) {
-			logger.Infof("machine %s matched, append task", machinePath)
-			machine, ok := store.Get(machinePath)
-			if ok {
-				machine.SubmitTask(newTask)
-			} else {
-				logger.Warnf("machine %s offline", machinePath)
-			}
-		}
 	}
 	c.JSON(http.StatusOK, Response{Signal: SignalOk})
 }
@@ -68,23 +46,12 @@ func HandleAssignTask(c *gin.Context) {
 		return
 	}
 
-	store := GetMachineStore()
-	machine, ok := store.Get(taskAssignRequest.MachineLabel)
-	if !ok {
-		c.JSON(SignalOk, Response{Signal: SignalError, Msg: "no machine mapping"})
+	task, errMsg := RequestTask(taskAssignRequest)
+	if errMsg != "" {
+		c.JSON(http.StatusOK, Response{Signal: SignalError, Msg: errMsg})
 		return
 	}
-
-	task := machine.PopHeadTask()
-	if task != nil {
-		task.Detail.Assignees = append(task.Detail.Assignees, machine.Label)
-		task.Status = TaskStatusAssigned
-		c.JSON(SignalOk, Response{Signal: SignalOk, Data: task})
-		return
-	}
-
-	// default
-	c.JSON(http.StatusOK, Response{Signal: SignalOk, Msg: "no task need to run"})
+	c.JSON(http.StatusOK, Response{Signal: SignalOk, Data: task})
 }
 
 func HandleDoneTask(c *gin.Context) {
