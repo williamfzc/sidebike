@@ -25,7 +25,7 @@ func HandlePostTask(c *gin.Context) {
 	}
 
 	// https://stackoverflow.com/a/20234207
-	newTask.Name = newTask.Name + time.Now().Format("20060102150405")
+	newTask.Name = fmt.Sprintf("%s-%s", newTask.Name, time.Now().Format("20060102150405"))
 
 	errMsg := DeliverTask(newTask)
 	if errMsg != "" {
@@ -85,7 +85,7 @@ func HandleDoneTask(c *gin.Context) {
 			agentResult.MachineLabel,
 			agentResult.Status,
 		)
-		task.Detail.Result = append(task.Detail.Result, agentResult)
+		task.Result = append(task.Result, agentResult)
 	}
 	c.JSON(http.StatusOK, Response{Signal: SignalOk})
 }
@@ -102,7 +102,7 @@ func HandleQueryTask(c *gin.Context) {
 	for i := range tasks {
 		item := tasks[i]
 		if strings.HasPrefix(item.Name, taskPrefix) {
-			tasksAfterFilter = append(tasksAfterFilter, item)
+			tasksAfterFilter = append(tasksAfterFilter, &item)
 		}
 	}
 	c.JSON(http.StatusOK, Response{Signal: SignalOk, Data: tasksAfterFilter})

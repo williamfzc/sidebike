@@ -13,11 +13,11 @@ func (s *Server) StartTaskMonitor() {
 
 func (s *Server) startTaskMonitorCheck() {
 	for _, each := range GetTaskStore().Items() {
-		assigneeNum := len(each.Detail.Assignees)
+		assigneeNum := len(each.Assignees)
 
 		// all the results collected
-		if (assigneeNum != 0) && assigneeNum == len(each.Detail.Result) {
-			for _, eachResult := range each.Detail.Result {
+		if (assigneeNum != 0) && assigneeNum == len(each.Result) {
+			for _, eachResult := range each.Result {
 				if eachResult.Failed() {
 					each.Status = TaskStatusError
 					break

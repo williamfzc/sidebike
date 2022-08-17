@@ -1,19 +1,19 @@
 package server
 
 type Task struct {
-	Name           string     `json:"name"`
-	Type           TaskType   `json:"type"`
-	MachinePattern string     `json:"machinePattern"`
-	Status         TaskStatus `json:"status"`
-	Detail         TaskDetail `json:"detail"`
+	Name           string         `json:"name"`
+	MachinePattern string         `json:"machinePattern"`
+	Status         TaskStatus     `json:"status"`
+	Detail         TaskDetail     `json:"detail"`
+	Assignees      []string       `json:"assignees"`
+	Result         []*AgentResult `json:"result"`
 }
 
+// TaskDetail describe how it works
 type TaskDetail struct {
-	Command   string         `json:"command"`
-	Workspace string         `json:"workspace"`
-	Timeout   int            `json:"timeout"`
-	Assignees []string       `json:"assignees"`
-	Result    []*AgentResult `json:"result"`
+	Command   string `json:"command"`
+	Workspace string `json:"workspace"`
+	Timeout   int    `json:"timeout"`
 }
 
 type AgentResult struct {
@@ -32,7 +32,6 @@ type TaskQueue []*Task
 func CreateNewTask() *Task {
 	return &Task{
 		Name:           "",
-		Type:           TaskTypeCmd,
 		MachinePattern: "",
 		Status:         TaskStatusNew,
 	}
@@ -46,10 +45,6 @@ func CreateNewAgentResult(assignee string) *AgentResult {
 		nil,
 	}
 }
-
-type TaskType int
-
-const TaskTypeCmd = 0
 
 type AgentResultStatus int
 

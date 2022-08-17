@@ -45,7 +45,7 @@ func RequestTask(request *TaskAssignRequest) (*Task, string) {
 	if task == nil {
 		return nil, "no task in machine queue"
 	}
-	task.Detail.Assignees = append(task.Detail.Assignees, machine.Label)
+	task.Assignees = append(task.Assignees, machine.Label)
 	task.Status = TaskStatusAssigned
 	return task, ""
 }
