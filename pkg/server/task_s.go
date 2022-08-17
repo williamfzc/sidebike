@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+	"time"
 )
 
 const FieldTaskPrefix = "taskPrefix"
@@ -21,6 +22,9 @@ func HandlePostTask(c *gin.Context) {
 		})
 		return
 	}
+
+	// https://stackoverflow.com/a/20234207
+	newTask.Name = newTask.Name + time.Now().Format("20060102150405")
 
 	errMsg := DeliverTask(newTask)
 	if errMsg != "" {
