@@ -52,7 +52,7 @@ func (agent *Agent) triggerTaskWork(task *server.Task) {
 		agentResult.Status = server.AgentStatusError
 	}
 
-	stdoutRet := userCmd.Status().Stdout
+	stdoutRet := append(userCmd.Status().Stdout, userCmd.Status().Stderr...)
 	if len(stdoutRet) > ResultLineLimit {
 		stdoutRet = stdoutRet[ResultLineLimit:]
 	}
