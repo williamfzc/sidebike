@@ -2,10 +2,11 @@ package server
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 const FieldTaskPrefix = "taskPrefix"
@@ -34,7 +35,11 @@ func HandlePostTask(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, Response{Signal: SignalOk})
+	c.JSON(http.StatusOK, Response{
+		Signal: SignalOk,
+		Msg:    "task registered",
+		Data:   &newTask,
+	})
 }
 
 func HandleAssignTask(c *gin.Context) {
