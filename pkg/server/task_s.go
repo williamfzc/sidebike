@@ -102,7 +102,7 @@ func HandleQueryTask(c *gin.Context) {
 	for i := range tasks {
 		item := tasks[i]
 		if strings.HasPrefix(item.Name, taskPrefix) {
-			tasksAfterFilter = append(tasksAfterFilter, &item)
+			tasksAfterFilter = append(tasksAfterFilter, item)
 		}
 	}
 	c.JSON(http.StatusOK, Response{Signal: SignalOk, Data: tasksAfterFilter})
