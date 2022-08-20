@@ -33,8 +33,8 @@ type Machine struct {
 	FirstAliveTime  time.Time     `json:"firstAliveTime"`
 	LatestAliveTime time.Time     `json:"latestAliveTime"`
 	eventQueue      chan *MachineEvent
-	mutex           *sync.Mutex
-	done            *context.CancelFunc
+	*sync.Mutex
+	done *context.CancelFunc
 }
 
 func CreateNewMachine(label string) *Machine {
@@ -47,7 +47,6 @@ func CreateNewMachine(label string) *Machine {
 		FirstAliveTime:  now,
 		LatestAliveTime: now,
 		eventQueue:      make(chan *MachineEvent),
-		mutex:           &sync.Mutex{},
 		done:            &cancel,
 	}
 
@@ -123,16 +122,16 @@ func (machine *Machine) SubmitTask(task *Task) {
 }
 
 func (machine *Machine) Stop() {
-	machine.mutex.Lock()
-	defer machine.mutex.Unlock()
+	machine.Lock()
+	defer machine.Unlock()
 
 	(*machine.done)()
 	logger.Infof("unregister machine %s because of offline", machine.Label)
 }
 
 func (machine *Machine) PopHeadTask() *Task {
-	machine.mutex.Lock()
-	defer machine.mutex.Unlock()
+	machine.Lock()
+	defer machine.Unlock()
 
 	if machine.IsEmptyTaskQueue() {
 		return nil
